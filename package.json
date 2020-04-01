@@ -1,11 +1,16 @@
 {
-  "name": "perspective-stresstest",
-  "version": "1.0.0",
-  "main": "index.js",
-  "repository": "git@github.com:sc1f/perspective-stresstest.git",
-  "author": "Jun Tan <tanjunyuan@hotmail.co.uk>",
-  "license": "MIT",
-  "dependencies": {
-    "puppeteer": "^2.1.1"
-  }
+    "name": "perspective-stresstest",
+    "version": "1.0.0",
+    "main": "index.js",
+    "repository": "git@github.com:sc1f/perspective-stresstest.git",
+    "author": "Jun Tan <tanjunyuan@hotmail.co.uk>",
+    "license": "MIT",
+    "dependencies": {
+        "fs-extra": "^9.0.0",
+        "minimist": "^1.2.5",
+        "puppeteer": "^2.1.1"
+    },
+    "scripts": {
+        "start": "node index.js"
+    }
 }
