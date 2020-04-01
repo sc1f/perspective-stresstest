@@ -1,0 +1,5 @@
+.DS_Store
+.vscode
+screenshots
+node_modules
+tmp
