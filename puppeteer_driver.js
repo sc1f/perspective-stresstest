@@ -71,6 +71,7 @@ class viewerHandle {
     }
     
     async setAttribute(attribute, value) {
+        console.log(attribute, value);
         if (typeof value !== "string") {
             value = JSON.stringify(value);
         }
@@ -104,6 +105,7 @@ class viewerHandle {
  * @param  {...any} args 
  */
 async function timeit(description, viewer, method, ...args) {
+    console.log(method);
     const start = performance.now();
     await method.call(viewer, ...args);
     const end = performance.now() - start;
