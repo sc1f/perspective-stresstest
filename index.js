@@ -35,6 +35,8 @@ const perspective = require("@finos/perspective");
     const NUM_INSTANCES = args.instances || 5;
     const NUM_ITERATIONS = args.iterations || 1;
 
+    console.log(`Running ${NUM_INSTANCES} instances for ${NUM_ITERATIONS} iterations against "${URL}"`)
+
     const results_table = perspective.table({
         "operation number": "integer",
         "completion timestamp": "datetime",
@@ -44,13 +46,7 @@ const perspective = require("@finos/perspective");
         "time taken (ms)": "float",
         "success": "string",
         "error": "string"
-    })
-
-    process.on("SIGINT", async function() {
-        console.log("Interrupted - flushing data to arrow");
-        await to_arrow(results_table);
-        process.exit(0);
-    })
+    });
 
     const test_driver = new Driver(URL, NUM_INSTANCES, NUM_ITERATIONS);
     Promise.all(await test_driver.run(make_viewer, viewer_test, results_table)).then(async results => {
