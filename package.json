@@ -6,11 +6,15 @@
     "author": "Jun Tan <tanjunyuan@hotmail.co.uk>",
     "license": "MIT",
     "dependencies": {
+        "@finos/perspective": "^0.4.6",
         "fs-extra": "^9.0.0",
         "minimist": "^1.2.5",
         "puppeteer": "^2.1.1"
     },
     "scripts": {
         "start": "node index.js"
+    },
+    "devDependencies": {
+        "@finos/perspective-cli": "^0.4.6"
     }
 }

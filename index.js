@@ -1,10 +1,20 @@
 const fs = require("fs-extra");
 const path = require("path");
 const minimist = require("minimist");
-const driver = require("./driver");
+const Driver = require("./driver").Driver;
+const make_viewer = require("./viewer_test").make_viewer;
 const viewer_test = require("./viewer_test").viewer_test;
+const perspective = require("@finos/perspective");
 
 (async () => {
+    const to_arrow = async function(table) {
+        const arrow = await table.view().to_arrow();
+        const name = `results_${Math.random()}.arrow`;
+        fs.writeFileSync(path.join(process.cwd(), name), new Buffer(arrow), "binary");
+        console.log(`Wrote ${await table.size()} rows to ${name}`);
+        return arrow;
+    }
+
     const args = minimist(process.argv.slice(2));
 
     if (args.h || args.help) {
@@ -20,44 +30,39 @@ const viewer_test = require("./viewer_test").viewer_test;
         return;
     }
 
-    const URL = args.url || "https://perspective-stresstest.herokuapp.com/";
-    const NUM_INSTANCES = 1 || args.instances;
-    const NUM_ITERATIONS = 5 || args.iterations;
-
-    let instance_count = 0;
-    let iteration_count = 0;
     let full_results = [];
+    const URL = args.url || "https://perspective-stresstest.herokuapp.com/";
+    const NUM_INSTANCES = args.instances || 5;
+    const NUM_ITERATIONS = args.iterations || 1;
 
-    const run_instance = () => {
-        if (instance_count == NUM_INSTANCES) return;
-        run_iteration();
-        instance_count++;
-    };
+    const results_table = perspective.table({
+        "operation number": "integer",
+        "completion timestamp": "datetime",
+        "instance name": "string",
+        "iteration name": "string",
+        description: "string",
+        "time taken (ms)": "float",
+        "success": "string",
+        "error": "string"
+    })
 
-    const run_iteration = () => {
-        const promises = [];
-        const instance_name = `instance_${instance_count}`;
+    process.on("SIGINT", async function() {
+        console.log("Interrupted - flushing data to arrow");
+        await to_arrow(results_table);
+        process.exit(0);
+    })
 
-        for (let i = 0; i < NUM_ITERATIONS; i++) {
-            const viewer_name = `viewer_${i}`;
-            driver.make_screenshot_folder(`${instance_name}_${viewer_name}`);
-            promises.push(driver.run(URL, viewer_test, instance_name, viewer_name));
+    const test_driver = new Driver(URL, NUM_INSTANCES, NUM_ITERATIONS);
+    Promise.all(await test_driver.run(make_viewer, viewer_test, results_table)).then(async results => {
+        await to_arrow(results_table);
+
+        for (const r of results) {
+            full_results = full_results.concat(r);
         }
-
-        iteration_count = 0;
-
-        Promise.all(promises).then(results => {
-            console.log(results);
-            for (const r of results) {
-                full_results = full_results.concat(r);
-            }
-
-            fs.writeFileSync(
-                path.join(__dirname, "results.json"),
-                JSON.stringify(full_results)
-            );
-        });
-    };
-
-    run_instance();
+    
+        fs.writeFileSync(
+            path.join(__dirname, "results.json"),
+            JSON.stringify(full_results)
+        );
+    });
 })();

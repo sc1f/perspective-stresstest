@@ -42,13 +42,16 @@ const CONFIGS = {
     }
 }
 
+exports.make_viewer = async (page, instance_name, viewer_name) => {
+    const _viewer = await page.$("perspective-viewer");
+    return new ViewerHandle(_viewer, page, instance_name, viewer_name);
+}
+
 
 /**
  * Run a series of operations on a `perspective-viewer`.
  */
-exports.viewer_test = async (page, timeit, instance_name, viewer_name) => {
-    const _viewer = await page.$("perspective-viewer");
-    const viewer = new ViewerHandle(_viewer, page, instance_name, viewer_name);
+exports.viewer_test = async (viewer, timeit) => {
     await timeit("Load page", viewer, viewer.wait);
 
     let counter = 0;
